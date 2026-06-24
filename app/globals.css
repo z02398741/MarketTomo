@@ -138,3 +138,120 @@
       radial-gradient(50rem 40rem at -10% 110%, color-mix(in oklch, var(--chart-2) 18%, transparent), transparent 55%);
   }
 }
+
+/* ────────────────────────────────────────────────────────────
+   MarketTomo — Cosmic Space theme (scoped to .cosmic)
+   AI × Space × Market Analytics. Deep blue-black, purple glow,
+   pink/purple gradient accents, glass cards. Not cyberpunk.
+   ──────────────────────────────────────────────────────────── */
+.cosmic {
+  --cosmic-bg: #040816;
+  --cosmic-purple: #7b4fd8;
+  --cosmic-violet: #b08cff;
+  --cosmic-pink: #ff72c5;
+  color: #f4f2ff;
+}
+
+/* Deep space backdrop with soft nebula glows */
+.cosmic-bg {
+  background-color: var(--cosmic-bg);
+  background-image:
+    radial-gradient(55rem 38rem at 85% -8%, color-mix(in srgb, var(--cosmic-purple) 30%, transparent), transparent 60%),
+    radial-gradient(48rem 40rem at -8% 12%, color-mix(in srgb, var(--cosmic-pink) 16%, transparent), transparent 55%),
+    radial-gradient(60rem 50rem at 50% 120%, color-mix(in srgb, var(--cosmic-violet) 14%, transparent), transparent 60%);
+}
+
+/* Frosted glass surface */
+.glass-card {
+  background: linear-gradient(
+    150deg,
+    color-mix(in srgb, #ffffff 8%, transparent),
+    color-mix(in srgb, #ffffff 3%, transparent)
+  );
+  border: 1px solid color-mix(in srgb, var(--cosmic-violet) 22%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.glass-card-hover {
+  transition: border-color 200ms ease, box-shadow 200ms ease, transform 200ms ease;
+}
+.glass-card-hover:hover {
+  border-color: color-mix(in srgb, var(--cosmic-violet) 50%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--cosmic-violet) 25%, transparent),
+    0 18px 50px -20px color-mix(in srgb, var(--cosmic-purple) 70%, transparent);
+  transform: translateY(-2px);
+}
+
+/* Pink → purple gradient accent text */
+.text-cosmic-gradient {
+  background: linear-gradient(95deg, var(--cosmic-violet), var(--cosmic-pink));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Glowing purple gradient button */
+.btn-cosmic {
+  background: linear-gradient(120deg, var(--cosmic-purple), var(--cosmic-pink));
+  color: #fff;
+  box-shadow: 0 8px 30px -8px color-mix(in srgb, var(--cosmic-purple) 80%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--cosmic-violet) 40%, transparent) inset;
+  transition: box-shadow 200ms ease, transform 120ms ease, filter 200ms ease;
+}
+.btn-cosmic:hover:not(:disabled) {
+  filter: brightness(1.08);
+  box-shadow: 0 10px 40px -6px color-mix(in srgb, var(--cosmic-pink) 75%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--cosmic-violet) 60%, transparent) inset;
+}
+.btn-cosmic:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.btn-cosmic:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Starfield: layered, twinkling points that keep drifting regardless of state */
+.starfield {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.star {
+  position: absolute;
+  border-radius: 9999px;
+  background: #ffffff;
+  animation: cosmic-twinkle var(--twinkle-duration, 4s) ease-in-out infinite;
+  animation-delay: var(--twinkle-delay, 0s);
+}
+.starfield-drift {
+  animation: cosmic-drift 90s linear infinite;
+}
+
+@keyframes cosmic-twinkle {
+  0%,
+  100% {
+    opacity: var(--twinkle-min, 0.2);
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: var(--twinkle-max, 0.95);
+    transform: scale(1.15);
+  }
+}
+@keyframes cosmic-drift {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-40px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .star,
+  .starfield-drift {
+    animation: none;
+  }
+}
