@@ -1,36 +1,159 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MarketTomo
+
+**AI Market Research Companion** — search, track, and analyze the Japanese
+market from one tech-forward dashboard.
+
+> AI × Space × Market Analytics
+
+---
+
+## Features
+
+- **Dashboard** — overview of tracked markets, signals, and AI insights.
+- **Search (V1, live)** — real-time product search against the **Rakuten
+  Ichiba** marketplace, presented in a *Cosmic Space* UI (deep-space backdrop,
+  twinkling starfield, glass cards, purple→pink glow). No mock data — results
+  come straight from the Rakuten API.
+- **Tracking** — monitor markets, competitors, and signals (UI scaffold).
+- **Settings** — workspace, profile, and notification preferences.
+
+The search layer is **platform-agnostic**: every result is normalized to a
+`Product` shape with a `platform` field, so Amazon / Mercari / Yahoo Shopping
+can be added later without touching the UI or API contract.
+
+---
+
+## Tech Stack
+
+| Area      | Choice                                  |
+| --------- | --------------------------------------- |
+| Framework | Next.js 16 (App Router, Turbopack)      |
+| Language  | TypeScript (strict)                     |
+| Styling   | Tailwind CSS v4                         |
+| UI        | shadcn/ui (`base-nova`, base-ui)        |
+| Theming   | next-themes (dark mode)                 |
+| Backend   | Route Handlers (`app/api/*`)            |
+| Data      | Rakuten Ichiba Item Search API          |
+| Planned   | Supabase, Zod, React Hook Form          |
+
+Server Components are the default; client components are used only where
+interactivity is required (search, theme toggle, sidebar).
+
+---
 
 ## Getting Started
 
-First, run the development server:
+### 1. Install
+
+```bash
+npm install
+```
+
+### 2. Configure environment
+
+Create a `.env.local` (already present with a placeholder) and add your
+Rakuten Application ID:
+
+```bash
+# .env.local
+RAKUTEN_APP_ID=your_rakuten_application_id
+```
+
+Get an Application ID from **[Rakuten Developers](https://webservice.rakuten.co.jp/)**
+(アプリ ID発行). It is required for `/api/search` to return real products.
+
+### 3. Run
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000), go to **/search**, and
+try a keyword such as `抱枕` to fetch live Rakuten products.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Search Flow
 
-## Learn More
+```
+User keyword
+   ↓
+/search (client)
+   ↓  fetch
+GET /api/search?keyword=...   ← Route Handler
+   ↓
+Rakuten Ichiba Item Search API
+   ↓
+normalized Product[] + stats  → rendered as cosmic product grid
+```
 
-To learn more about Next.js, take a look at the following resources:
+### Product shape
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```ts
+interface Product {
+  id: string
+  title: string
+  price: number
+  image: string
+  shop: string
+  reviewCount: number
+  reviewAverage: number
+  itemUrl: string
+  platform: "rakuten" | "amazon" | "mercari" | "yahoo"
+}
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+`GET /api/search` also returns aggregate stats (count, average / min / max
+price) used by the search result header.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Project Structure
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+app/
+  (app)/                 # authenticated app shell (sidebar + header)
+    page.tsx             # Dashboard
+    search/page.tsx      # Cosmic Space search experience
+    tracking/page.tsx
+    settings/page.tsx
+  api/
+    search/route.ts      # Rakuten-backed search endpoint
+  layout.tsx             # root: fonts, theme provider, toaster
+  globals.css            # design tokens + Cosmic Space theme
+components/
+  app-shell.tsx          # responsive shell (desktop sidebar + mobile drawer)
+  app-sidebar.tsx
+  search/                # starfield, search experience, product card
+  ui/                    # shadcn primitives
+lib/
+  types.ts               # Product / Platform / search types
+  rakuten.ts             # Rakuten API client + mapper
+  nav.ts                 # sidebar navigation config
+```
+
+---
+
+## Scripts
+
+| Command         | Description                  |
+| --------------- | ---------------------------- |
+| `npm run dev`   | Start the dev server         |
+| `npm run build` | Production build             |
+| `npm run start` | Serve the production build   |
+| `npm run lint`  | Run ESLint                   |
+
+---
+
+## Roadmap
+
+- [ ] Live tracking with Supabase persistence
+- [ ] Additional platforms (Amazon, Mercari, Yahoo Shopping)
+- [ ] Save / follow products (`加入追蹤`)
+- [ ] AI-generated market summaries
+
+---
+
+> **Note:** This project targets the locally installed Next.js (v16), whose
+> APIs may differ from older releases. See `AGENTS.md` and the bundled docs in
+> `node_modules/next/dist/docs/` before making framework-level changes.
