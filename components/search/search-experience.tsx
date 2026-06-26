@@ -1,12 +1,14 @@
 "use client"
 
 import * as React from "react"
-import { Search, Loader2, Sparkles, PackageSearch, AlertCircle } from "lucide-react"
+import { Search, Loader2, Sparkles, PackageSearch, AlertCircle, Wand2 } from "lucide-react"
 
-import type { SearchSuccess } from "@/lib/types"
+import type { Product } from "@/lib/types"
 import { ProductCard } from "@/components/search/product-card"
 
 type Status = "idle" | "loading" | "success" | "empty" | "error"
+
+type SearchResult = { keyword: string; products: Product[] }
 
 const yen = new Intl.NumberFormat("ja-JP", {
   style: "currency",
@@ -17,35 +19,68 @@ const yen = new Intl.NumberFormat("ja-JP", {
 export function SearchExperience() {
   const [query, setQuery] = React.useState("")
   const [status, setStatus] = React.useState<Status>("idle")
-  const [result, setResult] = React.useState<SearchSuccess | null>(null)
+  const [result, setResult] = React.useState<SearchResult | null>(null)
   const [errorMessage, setErrorMessage] = React.useState("")
+  const [aiKeywords, setAiKeywords] = React.useState<string[]>([])
 
-  async function runSearch(event: React.FormEvent) {
-    event.preventDefault()
-    const keyword = query.trim()
-    if (!keyword || status === "loading") return
+  // Non-blocking: ask the AI for related keywords AFTER the search resolves.
+  // Failures are swallowed so they never affect the search flow.
+  async function loadAiKeywords(keyword: string) {
+    try {
+      const res = await fetch("/api/keywords", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ keyword }),
+      })
+      const data = await res.json()
+      setAiKeywords(Array.isArray(data?.keywords) ? data.keywords : [])
+    } catch {
+      setAiKeywords([])
+    }
+  }
 
+  async function performSearch(rawKeyword: string) {
+    const keyword = rawKeyword.trim()
+    if (!keyword) return
+
+    setQuery(keyword)
     setStatus("loading")
     setResult(null)
     setErrorMessage("")
+    setAiKeywords([])
 
     try {
-      const res = await fetch(`/api/search?keyword=${encodeURIComponent(keyword)}`)
-      const data = await res.json()
+      const res = await fetch("/api/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ keyword }),
+      })
+      const data = (await res.json()) as
+        | { success: true; total: number; products: Product[] }
+        | { success: false; error: string }
 
-      if (!res.ok || "error" in data) {
-        setErrorMessage(data?.error ?? "搜尋失敗，請稍後再試。")
+      if (!res.ok || !data.success) {
+        setErrorMessage(
+          (!data.success && data.error) || "搜尋失敗，請稍後再試。"
+        )
         setStatus("error")
         return
       }
 
-      const success = data as SearchSuccess
-      setResult(success)
-      setStatus(success.products.length === 0 ? "empty" : "success")
+      const products = data.products ?? []
+      setResult({ keyword, products })
+      setStatus(products.length === 0 ? "empty" : "success")
+      void loadAiKeywords(keyword)
     } catch {
       setErrorMessage("搜尋失敗，請稍後再試。")
       setStatus("error")
     }
+  }
+
+  function onSubmit(event: React.FormEvent) {
+    event.preventDefault()
+    if (status === "loading") return
+    performSearch(query)
   }
 
   return (
@@ -60,7 +95,7 @@ export function SearchExperience() {
           搜尋<span className="text-cosmic-gradient">日本市場</span>商品
         </h1>
 
-        <form onSubmit={runSearch} className="mx-auto flex max-w-2xl flex-col gap-3 sm:flex-row">
+        <form onSubmit={onSubmit} className="mx-auto flex max-w-2xl flex-col gap-3 sm:flex-row">
           <div className="relative flex-1">
             <Search className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-white/40" />
             <input
@@ -95,10 +130,20 @@ export function SearchExperience() {
       {status === "idle" && <IdleState />}
       {status === "loading" && <LoadingGrid />}
       {status === "error" && <ErrorState message={errorMessage} />}
-      {status === "empty" && <EmptyResults />}
+      {status === "empty" && (
+        <div className="space-y-6">
+          <EmptyResults />
+          {aiKeywords.length > 0 && (
+            <AiKeywords keywords={aiKeywords} onSelect={performSearch} />
+          )}
+        </div>
+      )}
       {status === "success" && result && (
         <div className="space-y-6">
           <ResultHeader result={result} />
+          {aiKeywords.length > 0 && (
+            <AiKeywords keywords={aiKeywords} onSelect={performSearch} />
+          )}
           <ProductGrid result={result} />
         </div>
       )}
@@ -106,7 +151,36 @@ export function SearchExperience() {
   )
 }
 
-function ProductGrid({ result }: { result: SearchSuccess }) {
+function AiKeywords({
+  keywords,
+  onSelect,
+}: {
+  keywords: string[]
+  onSelect: (keyword: string) => void
+}) {
+  return (
+    <div className="glass-card rounded-2xl p-5">
+      <div className="mb-3 flex items-center gap-2 text-sm text-white/70">
+        <Wand2 className="size-4 text-[#b08cff]" />
+        AI Keywords
+      </div>
+      <div className="flex flex-wrap gap-2.5">
+        {keywords.map((keyword) => (
+          <button
+            key={keyword}
+            type="button"
+            onClick={() => onSelect(keyword)}
+            className="rounded-full border border-[#7b4fd8]/40 bg-[#7b4fd8]/15 px-3.5 py-1.5 text-sm text-[#e6dcff] shadow-[0_0_0_0_transparent] transition-all duration-200 hover:border-[#b08cff]/70 hover:bg-[#7b4fd8]/30 hover:text-white hover:shadow-[0_0_20px_-2px_#7b4fd8]"
+          >
+            {keyword}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function ProductGrid({ result }: { result: SearchResult }) {
   return (
     <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
       {result.products.map((product) => (
@@ -116,8 +190,16 @@ function ProductGrid({ result }: { result: SearchSuccess }) {
   )
 }
 
-function ResultHeader({ result }: { result: SearchSuccess }) {
-  const { stats, keyword } = result
+function ResultHeader({ result }: { result: SearchResult }) {
+  const { products, keyword } = result
+  const prices = products.map((p) => p.price).filter((p) => p > 0)
+  const sum = prices.reduce((a, b) => a + b, 0)
+  const stats = {
+    count: products.length,
+    averagePrice: prices.length ? Math.round(sum / prices.length) : 0,
+    minPrice: prices.length ? Math.min(...prices) : 0,
+    maxPrice: prices.length ? Math.max(...prices) : 0,
+  }
   const metrics = [
     { label: "商品數量", value: stats.count.toLocaleString() },
     { label: "平均價格", value: yen.format(stats.averagePrice) },
@@ -168,7 +250,7 @@ function IdleState() {
     <StateMessage
       icon={<PackageSearch className="size-7 text-[#b08cff]" />}
       title="搜尋日本市場商品"
-      description="輸入商品名、關鍵字或品牌，即可從楽天市場取得即時商品資料。"
+      description="輸入商品名、關鍵字或品牌，即可從樂天市場取得即時商品資料。"
     />
   )
 }
@@ -177,7 +259,7 @@ function EmptyResults() {
   return (
     <StateMessage
       icon={<PackageSearch className="size-7 text-[#b08cff]" />}
-      title="找不到相關商品。"
+      title="沒有找到商品。"
       description="試試其他關鍵字，或更換更通用的商品名稱。"
     />
   )
@@ -187,8 +269,8 @@ function ErrorState({ message }: { message: string }) {
   return (
     <StateMessage
       icon={<AlertCircle className="size-7 text-[#ff72c5]" />}
-      title={message || "搜尋失敗，請稍後再試。"}
-      description="請稍後再試一次。"
+      title="搜尋失敗。"
+      description={message || "請稍後再試一次。"}
     />
   )
 }
