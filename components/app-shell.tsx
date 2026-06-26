@@ -52,7 +52,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             variant="ghost"
             size="icon"
             className="md:hidden"
-            aria-label="Open menu"
+            aria-label="開啟選單"
             onClick={() => setMobileOpen(true)}
           >
             <Menu className="size-5" />
@@ -61,7 +61,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className="relative hidden max-w-md flex-1 sm:block">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search markets, companies, trends…"
+              placeholder="搜尋市場、公司、趨勢…"
               className="pl-9"
             />
           </div>

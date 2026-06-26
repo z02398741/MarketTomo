@@ -13,33 +13,33 @@ import {
 } from "@/components/ui/card"
 
 const stats = [
-  { label: "Tracked markets", value: "24", delta: "+3", icon: Radar },
-  { label: "Signals this week", value: "318", delta: "+12%", icon: Activity },
-  { label: "Competitors watched", value: "57", delta: "+5", icon: Eye },
-  { label: "Trend score", value: "82", delta: "+4 pts", icon: TrendingUp },
+  { label: "追蹤中的市場", value: "24", delta: "+3", icon: Radar },
+  { label: "本週訊號", value: "318", delta: "+12%", icon: Activity },
+  { label: "監看的競爭對手", value: "57", delta: "+5", icon: Eye },
+  { label: "趨勢分數", value: "82", delta: "+4 分", icon: TrendingUp },
 ]
 
 const insights = [
   {
-    title: "AI infrastructure spend accelerating",
-    market: "Cloud & Compute",
+    title: "AI 基礎設施支出加速成長",
+    market: "雲端與運算",
     summary:
-      "Enterprise GPU demand is outpacing supply for the third quarter running — pricing power is shifting to incumbents.",
-    tone: "Opportunity",
+      "企業 GPU 需求連續第三季供不應求，定價主導權正轉向現有大廠。",
+    tone: "機會",
   },
   {
-    title: "New entrant in vertical SaaS analytics",
+    title: "垂直 SaaS 分析市場出現新進者",
     market: "B2B SaaS",
     summary:
-      "A well-funded startup launched a competing product targeting your mid-market segment.",
-    tone: "Watch",
+      "一家資金充裕的新創推出競品，鎖定你的中端市場客群。",
+    tone: "觀察",
   },
   {
-    title: "Regulatory shift in data residency",
-    market: "Compliance",
+    title: "資料落地法規出現變動",
+    market: "法規遵循",
     summary:
-      "Upcoming EU rules may affect go-to-market timing for two of your tracked markets.",
-    tone: "Risk",
+      "即將上路的歐盟規範可能影響你兩個追蹤市場的進入時機。",
+    tone: "風險",
   },
 ]
 
@@ -47,14 +47,14 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8">
       <PageHeader
-        title="Dashboard"
-        description="Your AI market research, summarized at a glance."
+        title="儀表板"
+        description="一眼掌握你的 AI 市場研究。"
       >
         <Button variant="outline" size="lg" render={<Link href="/tracking" />}>
-          View tracking
+          查看追蹤
         </Button>
         <Button size="lg" render={<Link href="/search" />}>
-          New research
+          開始研究
         </Button>
       </PageHeader>
 
@@ -74,7 +74,7 @@ export default function DashboardPage() {
                 {stat.delta}
               </Badge>
               <span className="ml-2 text-xs text-muted-foreground">
-                vs last week
+                較上週
               </span>
             </CardContent>
           </Card>
@@ -84,9 +84,9 @@ export default function DashboardPage() {
       {/* Insights */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold tracking-tight">Latest insights</h2>
+          <h2 className="text-lg font-semibold tracking-tight">最新洞察</h2>
           <Button variant="ghost" size="sm" render={<Link href="/search" />}>
-            Explore all
+            查看全部
             <ArrowUpRight className="size-4" />
           </Button>
         </div>

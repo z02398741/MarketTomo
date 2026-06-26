@@ -26,7 +26,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
         <div className="flex flex-col leading-tight">
           <span className="text-sm font-semibold tracking-tight">MarketTomo</span>
           <span className="text-[11px] text-muted-foreground">
-            AI Market Research Companion
+            AI 市場研究夥伴
           </span>
         </div>
         {onNavigate && (
@@ -34,7 +34,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
             variant="ghost"
             size="icon"
             className="ml-auto md:hidden"
-            aria-label="Close menu"
+            aria-label="關閉選單"
             onClick={onNavigate}
           >
             <X className="size-5" />
@@ -45,7 +45,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
       {/* Navigation */}
       <nav className="flex-1 space-y-1 px-3 py-4">
         <p className="px-3 pb-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-          Workspace
+          工作區
         </p>
         {navItems.map((item) => {
           const active = isActive(pathname, item.href)
@@ -79,9 +79,9 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
       {/* Footer */}
       <div className="border-t border-sidebar-border p-4">
         <div className="rounded-xl bg-sidebar-accent/50 p-3">
-          <p className="text-xs font-medium">Research credits</p>
+          <p className="text-xs font-medium">研究額度</p>
           <p className="mt-1 text-[11px] text-muted-foreground">
-            720 of 1,000 used this month
+            本月已使用 720 / 1,000
           </p>
           <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-sidebar-border">
             <div className="h-full w-[72%] rounded-full bg-sidebar-primary" />

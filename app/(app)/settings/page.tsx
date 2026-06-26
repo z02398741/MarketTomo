@@ -21,20 +21,20 @@ export const metadata: Metadata = { title: "Settings" }
 const notifications = [
   {
     id: "alerts",
-    label: "Signal alerts",
-    description: "Get notified when a tracked item triggers an alert.",
+    label: "訊號警示",
+    description: "當追蹤項目觸發警示時通知你。",
     defaultChecked: true,
   },
   {
     id: "digest",
-    label: "Weekly digest",
-    description: "A Monday summary of the markets you follow.",
+    label: "每週摘要",
+    description: "每週一彙整你關注市場的摘要。",
     defaultChecked: true,
   },
   {
     id: "product",
-    label: "Product updates",
-    description: "Occasional news about new MarketTomo features.",
+    label: "產品更新",
+    description: "不定期推送 MarketTomo 新功能消息。",
     defaultChecked: false,
   },
 ]
@@ -43,41 +43,41 @@ export default function SettingsPage() {
   return (
     <div className="space-y-8">
       <PageHeader
-        title="Settings"
-        description="Manage your workspace, profile and notification preferences."
+        title="設定"
+        description="管理你的工作區、個人檔案與通知偏好。"
       />
 
       <Tabs defaultValue="profile" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="workspace">Workspace</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
+          <TabsTrigger value="profile">個人檔案</TabsTrigger>
+          <TabsTrigger value="workspace">工作區</TabsTrigger>
+          <TabsTrigger value="notifications">通知</TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile">
           <Card>
             <CardHeader>
-              <CardTitle>Profile</CardTitle>
+              <CardTitle>個人檔案</CardTitle>
               <CardDescription>
-                This information appears across your MarketTomo workspace.
+                這些資訊會顯示在你的 MarketTomo 工作區中。
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="name">Full name</Label>
+                <Label htmlFor="name">全名</Label>
                 <Input id="name" defaultValue="Market Tomo" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">電子郵件</Label>
                 <Input id="email" type="email" defaultValue="you@example.com" />
               </div>
               <div className="space-y-2 sm:col-span-2">
-                <Label htmlFor="role">Role</Label>
-                <Input id="role" defaultValue="Head of Market Research" />
+                <Label htmlFor="role">職稱</Label>
+                <Input id="role" defaultValue="市場研究主管" />
               </div>
             </CardContent>
             <CardFooter className="justify-end">
-              <Button>Save changes</Button>
+              <Button>儲存變更</Button>
             </CardFooter>
           </Card>
         </TabsContent>
@@ -85,23 +85,23 @@ export default function SettingsPage() {
         <TabsContent value="workspace">
           <Card>
             <CardHeader>
-              <CardTitle>Workspace</CardTitle>
+              <CardTitle>工作區</CardTitle>
               <CardDescription>
-                Settings that apply to everyone in this workspace.
+                套用至此工作區所有成員的設定。
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="workspace">Workspace name</Label>
+                <Label htmlFor="workspace">工作區名稱</Label>
                 <Input id="workspace" defaultValue="MarketTomo" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="region">Default region</Label>
-                <Input id="region" defaultValue="Global" />
+                <Label htmlFor="region">預設地區</Label>
+                <Input id="region" defaultValue="全球" />
               </div>
             </CardContent>
             <CardFooter className="justify-end">
-              <Button>Save changes</Button>
+              <Button>儲存變更</Button>
             </CardFooter>
           </Card>
         </TabsContent>
@@ -109,9 +109,9 @@ export default function SettingsPage() {
         <TabsContent value="notifications">
           <Card>
             <CardHeader>
-              <CardTitle>Notifications</CardTitle>
+              <CardTitle>通知</CardTitle>
               <CardDescription>
-                Choose what MarketTomo notifies you about.
+                選擇 MarketTomo 要通知你的內容。
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-1">

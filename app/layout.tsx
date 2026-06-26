@@ -17,11 +17,11 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "MarketTomo — AI Market Research Companion",
+    default: "MarketTomo — AI 市場研究夥伴",
     template: "%s · MarketTomo",
   },
   description:
-    "MarketTomo is your AI Market Research Companion — search markets, track competitors, and surface signals in one tech-forward dashboard.",
+    "MarketTomo 是你的 AI 市場研究夥伴 — 在一個科技感十足的儀表板中搜尋市場、追蹤競爭對手並掌握訊號。",
 };
 
 export default function RootLayout({

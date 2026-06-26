@@ -9,27 +9,27 @@ export type NavItem = {
 
 export const navItems: NavItem[] = [
   {
-    title: "Dashboard",
+    title: "儀表板",
     href: "/",
     icon: LayoutDashboard,
-    description: "Overview of your market research",
+    description: "市場研究總覽",
   },
   {
-    title: "Search",
+    title: "搜尋",
     href: "/search",
     icon: Search,
-    description: "Explore markets, competitors and trends",
+    description: "探索市場、競爭對手與趨勢",
   },
   {
-    title: "Tracking",
+    title: "追蹤",
     href: "/tracking",
     icon: Radar,
-    description: "Monitor signals and saved queries",
+    description: "監控訊號與已儲存的查詢",
   },
   {
-    title: "Settings",
+    title: "設定",
     href: "/settings",
     icon: Settings,
-    description: "Workspace and account preferences",
+    description: "工作區與帳號偏好設定",
   },
 ]
