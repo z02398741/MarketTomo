@@ -1,9 +1,17 @@
 "use client"
 
 import * as React from "react"
-import { Search, Loader2, Sparkles, PackageSearch, AlertCircle, Wand2 } from "lucide-react"
+import {
+  Search,
+  Loader2,
+  Sparkles,
+  PackageSearch,
+  AlertCircle,
+  Wand2,
+} from "lucide-react"
 
-import type { Product } from "@/lib/types"
+import type { Platform, Product } from "@/lib/types"
+import { incrementSearchCount } from "@/lib/search-stats"
 import { ProductCard } from "@/components/search/product-card"
 
 type Status = "idle" | "loading" | "success" | "empty" | "error"
@@ -16,15 +24,25 @@ const yen = new Intl.NumberFormat("ja-JP", {
   maximumFractionDigits: 0,
 })
 
+type PlatformFilter = Platform | "all"
+
+const PLATFORM_OPTIONS: { value: PlatformFilter; label: string }[] = [
+  { value: "all", label: "全平台" },
+  { value: "rakuten", label: "樂天" },
+  { value: "amazon", label: "Amazon" },
+  { value: "mercari", label: "Mercari" },
+  { value: "yahoo", label: "Yahoo" },
+]
+
 export function SearchExperience() {
   const [query, setQuery] = React.useState("")
   const [status, setStatus] = React.useState<Status>("idle")
   const [result, setResult] = React.useState<SearchResult | null>(null)
   const [errorMessage, setErrorMessage] = React.useState("")
   const [aiKeywords, setAiKeywords] = React.useState<string[]>([])
+  const [platformFilter, setPlatformFilter] =
+    React.useState<PlatformFilter>("all")
 
-  // Non-blocking: ask the AI for related keywords AFTER the search resolves.
-  // Failures are swallowed so they never affect the search flow.
   async function loadAiKeywords(keyword: string) {
     try {
       const res = await fetch("/api/keywords", {
@@ -39,9 +57,14 @@ export function SearchExperience() {
     }
   }
 
-  async function performSearch(rawKeyword: string) {
+  async function performSearch(
+    rawKeyword: string,
+    overridePlatform?: PlatformFilter,
+  ) {
     const keyword = rawKeyword.trim()
     if (!keyword) return
+
+    const platform = overridePlatform ?? platformFilter
 
     setQuery(keyword)
     setStatus("loading")
@@ -49,11 +72,16 @@ export function SearchExperience() {
     setErrorMessage("")
     setAiKeywords([])
 
+    incrementSearchCount()
+
     try {
+      const body: Record<string, string> = { keyword }
+      if (platform !== "all") body.platform = platform
+
       const res = await fetch("/api/search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ keyword }),
+        body: JSON.stringify(body),
       })
       const data = (await res.json()) as
         | { success: true; total: number; products: Product[] }
@@ -61,7 +89,7 @@ export function SearchExperience() {
 
       if (!res.ok || !data.success) {
         setErrorMessage(
-          (!data.success && data.error) || "搜尋失敗，請稍後再試。"
+          (!data.success && data.error) || "搜尋失敗，請稍後再試。",
         )
         setStatus("error")
         return
@@ -95,7 +123,10 @@ export function SearchExperience() {
           搜尋<span className="text-cosmic-gradient">日本市場</span>商品
         </h1>
 
-        <form onSubmit={onSubmit} className="mx-auto flex max-w-2xl flex-col gap-3 sm:flex-row">
+        <form
+          onSubmit={onSubmit}
+          className="mx-auto flex max-w-2xl flex-col gap-3 sm:flex-row"
+        >
           <div className="relative flex-1">
             <Search className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-white/40" />
             <input
@@ -124,6 +155,25 @@ export function SearchExperience() {
             )}
           </button>
         </form>
+
+        {/* Platform filter */}
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          {PLATFORM_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => setPlatformFilter(opt.value)}
+              className={[
+                "rounded-full border px-4 py-1.5 text-sm font-medium transition-all duration-200",
+                platformFilter === opt.value
+                  ? "border-[#b08cff]/70 bg-[#7b4fd8]/30 text-[#e6dcff] shadow-[0_0_16px_-2px_#7b4fd8]"
+                  : "border-white/15 bg-white/5 text-white/50 hover:border-white/30 hover:text-white/80",
+              ].join(" ")}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Result states */}
@@ -140,7 +190,7 @@ export function SearchExperience() {
       )}
       {status === "success" && result && (
         <div className="space-y-6">
-          <ResultHeader result={result} />
+          <ResultHeader result={result} platform={platformFilter} />
           {aiKeywords.length > 0 && (
             <AiKeywords keywords={aiKeywords} onSelect={performSearch} />
           )}
@@ -190,7 +240,13 @@ function ProductGrid({ result }: { result: SearchResult }) {
   )
 }
 
-function ResultHeader({ result }: { result: SearchResult }) {
+function ResultHeader({
+  result,
+  platform,
+}: {
+  result: SearchResult
+  platform: PlatformFilter
+}) {
   const { products, keyword } = result
   const prices = products.map((p) => p.price).filter((p) => p > 0)
   const sum = prices.reduce((a, b) => a + b, 0)
@@ -199,6 +255,13 @@ function ResultHeader({ result }: { result: SearchResult }) {
     averagePrice: prices.length ? Math.round(sum / prices.length) : 0,
     minPrice: prices.length ? Math.min(...prices) : 0,
     maxPrice: prices.length ? Math.max(...prices) : 0,
+  }
+  const platformNames: Record<PlatformFilter, string> = {
+    all: "全平台",
+    rakuten: "樂天",
+    amazon: "Amazon",
+    mercari: "Mercari",
+    yahoo: "Yahoo",
   }
   const metrics = [
     { label: "商品數量", value: stats.count.toLocaleString() },
@@ -210,7 +273,12 @@ function ResultHeader({ result }: { result: SearchResult }) {
   return (
     <div className="glass-card rounded-2xl p-5">
       <p className="text-sm text-white/60">
-        搜尋關鍵字「<span className="font-medium text-white">{keyword}</span>」
+        搜尋關鍵字「
+        <span className="font-medium text-white">{keyword}</span>」
+        ・平台：
+        <span className="font-medium text-[#b08cff]">
+          {platformNames[platform]}
+        </span>
       </p>
       <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
         {metrics.map((m) => (
@@ -250,7 +318,7 @@ function IdleState() {
     <StateMessage
       icon={<PackageSearch className="size-7 text-[#b08cff]" />}
       title="搜尋日本市場商品"
-      description="輸入商品名、關鍵字或品牌，即可從樂天市場取得即時商品資料。"
+      description="輸入商品名、關鍵字或品牌，即可從樂天・Amazon・Mercari 取得即時商品資料。"
     />
   )
 }
@@ -260,7 +328,7 @@ function EmptyResults() {
     <StateMessage
       icon={<PackageSearch className="size-7 text-[#b08cff]" />}
       title="沒有找到商品。"
-      description="試試其他關鍵字，或更換更通用的商品名稱。"
+      description="試試其他關鍵字，或更換平台篩選條件。"
     />
   )
 }

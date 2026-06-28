@@ -1,17 +1,21 @@
 "use client"
 
 import * as React from "react"
-import { Menu, Search } from "lucide-react"
+import { Menu } from "lucide-react"
+import Link from "next/link"
 
 import { cn } from "@/lib/utils"
+import { getInitials } from "@/lib/settings"
 import { AppSidebar } from "@/components/app-sidebar"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { useSettings } from "@/components/settings-context"
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = React.useState(false)
+  const { settings } = useSettings()
+  const initials = getInitials(settings.profile.name)
 
   return (
     <div className="bg-glow min-h-svh">
@@ -58,21 +62,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <Menu className="size-5" />
           </Button>
 
-          <div className="relative hidden max-w-md flex-1 sm:block">
-            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="搜尋市場、公司、趨勢…"
-              className="pl-9"
-            />
-          </div>
-
           <div className="ml-auto flex items-center gap-1.5">
             <ThemeToggle />
-            <Avatar className="size-9">
-              <AvatarFallback className="bg-primary/15 text-primary">
-                MT
-              </AvatarFallback>
-            </Avatar>
+            <Link href="/settings" aria-label="前往設定">
+              <Avatar className="size-9 cursor-pointer ring-2 ring-transparent transition-all hover:ring-primary/40">
+                <AvatarFallback className="bg-primary/15 text-primary text-sm font-medium">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+            </Link>
           </div>
         </header>
 

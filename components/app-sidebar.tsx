@@ -1,11 +1,13 @@
 "use client"
 
+import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Sparkles, X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { navItems } from "@/lib/nav"
+import { loadSearchStats, getMonthlyLimit } from "@/lib/search-stats"
 import { Button } from "@/components/ui/button"
 
 function isActive(pathname: string, href: string) {
@@ -15,6 +17,15 @@ function isActive(pathname: string, href: string) {
 
 export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname()
+  const [searchCount, setSearchCount] = React.useState(0)
+  const limit = getMonthlyLimit()
+
+  // Read search count from localStorage after mount
+  React.useEffect(() => {
+    React.startTransition(() => setSearchCount(loadSearchStats().count))
+  }, [pathname]) // re-read on every navigation so count stays fresh
+
+  const usedPct = Math.min(100, Math.round((searchCount / limit) * 100))
 
   return (
     <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
@@ -24,7 +35,9 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
           <Sparkles className="size-5" />
         </span>
         <div className="flex flex-col leading-tight">
-          <span className="text-sm font-semibold tracking-tight">MarketTomo</span>
+          <span className="text-sm font-semibold tracking-tight">
+            MarketTomo
+          </span>
           <span className="text-[11px] text-muted-foreground">
             AI 市場研究夥伴
           </span>
@@ -59,7 +72,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
                 "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                 active
                   ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                  : "text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground"
+                  : "text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground",
               )}
             >
               <item.icon
@@ -67,7 +80,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
                   "size-4.5 shrink-0 transition-colors",
                   active
                     ? "text-sidebar-primary"
-                    : "text-muted-foreground group-hover:text-sidebar-accent-foreground"
+                    : "text-muted-foreground group-hover:text-sidebar-accent-foreground",
                 )}
               />
               {item.title}
@@ -76,15 +89,18 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
         })}
       </nav>
 
-      {/* Footer */}
+      {/* Search quota footer */}
       <div className="border-t border-sidebar-border p-4">
         <div className="rounded-xl bg-sidebar-accent/50 p-3">
-          <p className="text-xs font-medium">研究額度</p>
+          <p className="text-xs font-medium">本月搜尋額度</p>
           <p className="mt-1 text-[11px] text-muted-foreground">
-            本月已使用 720 / 1,000
+            已使用 {searchCount.toLocaleString()} / {limit.toLocaleString()}
           </p>
           <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-sidebar-border">
-            <div className="h-full w-[72%] rounded-full bg-sidebar-primary" />
+            <div
+              className="h-full rounded-full bg-sidebar-primary transition-all duration-500"
+              style={{ width: `${usedPct}%` }}
+            />
           </div>
         </div>
       </div>
