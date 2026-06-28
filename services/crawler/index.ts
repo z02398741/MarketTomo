@@ -15,7 +15,7 @@ export const crawlers: Record<Platform, SearchCrawler> = {
 }
 
 // Platforms that are actually wired up (used by the UI / API today).
-export const activePlatforms: Platform[] = ["rakuten"]
+export const activePlatforms: Platform[] = ["rakuten", "amazon", "mercari"]
 
 /**
  * Run a single platform's crawler.

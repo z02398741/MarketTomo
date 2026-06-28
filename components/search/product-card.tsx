@@ -1,6 +1,9 @@
-import { Star, ExternalLink, Plus, ImageOff } from "lucide-react"
+"use client"
+
+import { Star, ExternalLink, Plus, Check, ImageOff } from "lucide-react"
 
 import type { Product } from "@/lib/types"
+import { useTracking } from "@/components/tracking-context"
 
 const yen = new Intl.NumberFormat("ja-JP", {
   style: "currency",
@@ -9,6 +12,9 @@ const yen = new Intl.NumberFormat("ja-JP", {
 })
 
 export function ProductCard({ product }: { product: Product }) {
+  const { trackedIds, toggleTracking } = useTracking()
+  const isTracked = trackedIds.has(product.id)
+
   return (
     <article className="glass-card glass-card-hover flex flex-col overflow-hidden rounded-2xl">
       {/* Image */}
@@ -72,12 +78,21 @@ export function ProductCard({ product }: { product: Product }) {
           </a>
           <button
             type="button"
-            disabled
-            aria-label="加入追蹤（即將推出）"
-            title="加入追蹤（即將推出）"
-            className="inline-flex items-center justify-center rounded-lg border border-white/15 bg-white/5 p-2 text-white/40 disabled:cursor-not-allowed"
+            onClick={() => toggleTracking(product)}
+            aria-label={isTracked ? "取消追蹤" : "加入追蹤"}
+            title={isTracked ? "取消追蹤" : "加入追蹤"}
+            className={[
+              "inline-flex items-center justify-center rounded-lg border p-2 transition-all duration-200",
+              isTracked
+                ? "border-[#b08cff]/60 bg-[#7b4fd8]/30 text-[#b08cff]"
+                : "border-white/15 bg-white/5 text-white/40 hover:border-[#b08cff]/40 hover:bg-[#7b4fd8]/20 hover:text-[#b08cff]",
+            ].join(" ")}
           >
-            <Plus className="size-4" />
+            {isTracked ? (
+              <Check className="size-4" />
+            ) : (
+              <Plus className="size-4" />
+            )}
           </button>
         </div>
       </div>
