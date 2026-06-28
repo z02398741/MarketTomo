@@ -32,7 +32,13 @@ export function SettingsForm() {
   const [profileErrors, setProfileErrors] = React.useState<FieldErrors>({})
   const [workspaceErrors, setWorkspaceErrors] = React.useState<FieldErrors>({})
 
+  // Hydrate local form state once from context (after localStorage loads).
+  // A ref prevents re-running on subsequent context updates so unsaved edits
+  // in other tabs are never overwritten.
+  const initialized = React.useRef(false)
   React.useEffect(() => {
+    if (initialized.current) return
+    initialized.current = true
     React.startTransition(() => {
       setProfile(settings.profile)
       setWorkspace(settings.workspace)

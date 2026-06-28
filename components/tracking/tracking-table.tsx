@@ -5,6 +5,7 @@ import { ExternalLink, Trash2, PackageSearch } from "lucide-react"
 
 import type { Product } from "@/lib/types"
 import { useTracking } from "@/components/tracking-context"
+import { PLATFORM_LABELS } from "@/lib/platforms"
 import {
   Table,
   TableBody,
@@ -20,13 +21,6 @@ const yen = new Intl.NumberFormat("ja-JP", {
   currency: "JPY",
   maximumFractionDigits: 0,
 })
-
-const PLATFORM_LABELS: Record<string, string> = {
-  rakuten: "楽天",
-  amazon: "Amazon",
-  mercari: "Mercari",
-  yahoo: "Yahoo",
-}
 
 export function TrackingTable() {
   const { trackedIds, toggleTracking } = useTracking()

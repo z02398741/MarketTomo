@@ -55,6 +55,16 @@ function upsertProductCache(product: Product) {
   }
 }
 
+function removeProductCache(id: string) {
+  try {
+    const raw = localStorage.getItem(LS_PRODUCTS_KEY)
+    const arr: Product[] = raw ? JSON.parse(raw) : []
+    localStorage.setItem(LS_PRODUCTS_KEY, JSON.stringify(arr.filter((p) => p.id !== id)))
+  } catch {
+    // ignore
+  }
+}
+
 export function TrackingProvider({ children }: { children: React.ReactNode }) {
   const [trackedIds, setTrackedIds] = React.useState<Set<string>>(new Set())
 
@@ -71,14 +81,15 @@ export function TrackingProvider({ children }: { children: React.ReactNode }) {
 
       if (isTracked) {
         next.delete(product.id)
-        toast.success(`已移除追蹤：${product.title.slice(0, 30)}…`)
+        removeProductCache(product.id)
+        toast.success(`已移除追蹤：${product.title.length > 30 ? product.title.slice(0, 30) + "…" : product.title}`)
         void fetch(`/api/tracking?id=${encodeURIComponent(product.id)}`, {
           method: "DELETE",
         }).catch(() => null)
       } else {
         next.add(product.id)
         upsertProductCache(product)
-        toast.success(`已加入追蹤：${product.title.slice(0, 30)}…`)
+        toast.success(`已加入追蹤：${product.title.length > 30 ? product.title.slice(0, 30) + "…" : product.title}`)
         void fetch("/api/tracking", {
           method: "POST",
           headers: { "Content-Type": "application/json" },

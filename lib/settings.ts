@@ -28,7 +28,12 @@ export function loadSettings(): AppSettings {
   try {
     const raw = localStorage.getItem(LS_KEY)
     if (!raw) return DEFAULT_SETTINGS
-    return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) }
+    const parsed = JSON.parse(raw) as Partial<AppSettings>
+    return {
+      profile: { ...DEFAULT_SETTINGS.profile, ...parsed.profile },
+      workspace: { ...DEFAULT_SETTINGS.workspace, ...parsed.workspace },
+      notifications: { ...DEFAULT_SETTINGS.notifications, ...parsed.notifications },
+    }
   } catch {
     return DEFAULT_SETTINGS
   }
@@ -44,8 +49,9 @@ export function saveSettings(settings: AppSettings): void {
 
 // Derive avatar initials from the profile name (up to 2 chars)
 export function getInitials(name: string): string {
-  return name
-    .trim()
+  const trimmed = name.trim()
+  if (!trimmed) return "MT"
+  return trimmed
     .split(/\s+/)
     .map((w) => w[0])
     .join("")

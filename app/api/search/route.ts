@@ -17,6 +17,14 @@ export async function POST(request: NextRequest) {
     )
   }
 
+  // Validate explicit platform filter
+  if (platformParam && !activePlatforms.includes(platformParam as Platform)) {
+    return NextResponse.json(
+      { success: false, error: `不支援的平台：${platformParam}` },
+      { status: 400 }
+    )
+  }
+
   // Determine which platforms to search
   const platforms: Platform[] = platformParam
     ? activePlatforms.filter((p) => p === platformParam)

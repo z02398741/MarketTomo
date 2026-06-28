@@ -1,4 +1,5 @@
 import type { Platform, Product } from "@/lib/types"
+import { ACTIVE_PLATFORMS } from "@/lib/platforms"
 import { searchRakuten } from "./rakuten"
 import { searchAmazon } from "./amazon"
 import { searchMercari } from "./mercari"
@@ -15,13 +16,8 @@ export const crawlers: Record<Platform, SearchCrawler> = {
   yahoo: searchYahoo,
 }
 
-// Platforms that are actively wired up (searched by default).
-export const activePlatforms: Platform[] = [
-  "rakuten",
-  "amazon",
-  "mercari",
-  "yahoo",
-]
+// Re-export ACTIVE_PLATFORMS so existing imports of activePlatforms still work.
+export const activePlatforms: Platform[] = ACTIVE_PLATFORMS
 
 /**
  * Run a single platform's crawler.
