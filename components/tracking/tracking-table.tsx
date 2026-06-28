@@ -55,7 +55,7 @@ export function TrackingTable() {
         <PackageSearch className="size-10 opacity-40" />
         <p className="text-sm">尚無追蹤商品。</p>
         <p className="text-xs opacity-60">
-          在搜尋頁面點擊商品卡右下角的 + 按鈕即可加入追蹤。
+          前往搜尋頁面，點擊商品卡右下角的 + 按鈕即可加入追蹤。
         </p>
       </div>
     )

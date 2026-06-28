@@ -2,6 +2,7 @@
 
 import { Activity, Eye, Radar, TrendingUp } from "lucide-react"
 import { useTracking } from "@/components/tracking-context"
+import { ACTIVE_PLATFORMS, PLATFORM_LABELS } from "@/lib/platforms"
 import {
   Card,
   CardContent,
@@ -11,7 +12,7 @@ import {
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 
-const PLATFORM_COUNT = 3 // rakuten + amazon + mercari
+const platformSummary = ACTIVE_PLATFORMS.map((p) => PLATFORM_LABELS[p]).join("・")
 
 export function DashboardStats() {
   const { trackedIds } = useTracking()
@@ -26,8 +27,8 @@ export function DashboardStats() {
     },
     {
       label: "支援平台",
-      value: PLATFORM_COUNT.toString(),
-      delta: "樂天・Amazon・Mercari",
+      value: ACTIVE_PLATFORMS.length.toString(),
+      delta: platformSummary,
       icon: Activity,
     },
     {

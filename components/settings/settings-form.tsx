@@ -19,17 +19,19 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+type FieldErrors = Partial<Record<string, string>>
+
 export function SettingsForm() {
   const { settings, updateSettings } = useSettings()
 
-  // Local draft state — only committed to context on save
   const [profile, setProfile] = React.useState(settings.profile)
   const [workspace, setWorkspace] = React.useState(settings.workspace)
-  const [notifications, setNotifications] = React.useState(
-    settings.notifications,
-  )
+  const [notifications, setNotifications] = React.useState(settings.notifications)
+  const [profileErrors, setProfileErrors] = React.useState<FieldErrors>({})
+  const [workspaceErrors, setWorkspaceErrors] = React.useState<FieldErrors>({})
 
-  // Sync when context hydrates from localStorage
   React.useEffect(() => {
     React.startTransition(() => {
       setProfile(settings.profile)
@@ -38,12 +40,35 @@ export function SettingsForm() {
     })
   }, [settings])
 
+  function validateProfile(): FieldErrors {
+    const errors: FieldErrors = {}
+    if (!profile.name.trim()) errors.name = "請輸入全名。"
+    if (!profile.email.trim()) {
+      errors.email = "請輸入電子郵件。"
+    } else if (!EMAIL_RE.test(profile.email.trim())) {
+      errors.email = "請輸入有效的電子郵件格式。"
+    }
+    return errors
+  }
+
+  function validateWorkspace(): FieldErrors {
+    const errors: FieldErrors = {}
+    if (!workspace.name.trim()) errors.name = "請輸入工作區名稱。"
+    return errors
+  }
+
   function saveProfile() {
+    const errors = validateProfile()
+    setProfileErrors(errors)
+    if (Object.keys(errors).length > 0) return
     updateSettings({ profile })
     toast.success("個人檔案已儲存。")
   }
 
   function saveWorkspace() {
+    const errors = validateWorkspace()
+    setWorkspaceErrors(errors)
+    if (Object.keys(errors).length > 0) return
     updateSettings({ workspace })
     toast.success("工作區設定已儲存。")
   }
@@ -90,31 +115,50 @@ export function SettingsForm() {
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="name">全名</Label>
+              <Label htmlFor="name">
+                全名 <span className="text-destructive">*</span>
+              </Label>
               <Input
                 id="name"
                 value={profile.name}
-                onChange={(e) =>
+                placeholder="請輸入全名"
+                aria-invalid={!!profileErrors.name}
+                onChange={(e) => {
                   setProfile((p) => ({ ...p, name: e.target.value }))
-                }
+                  if (profileErrors.name)
+                    setProfileErrors((err) => ({ ...err, name: undefined }))
+                }}
               />
+              {profileErrors.name && (
+                <p className="text-xs text-destructive">{profileErrors.name}</p>
+              )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">電子郵件</Label>
+              <Label htmlFor="email">
+                電子郵件 <span className="text-destructive">*</span>
+              </Label>
               <Input
                 id="email"
                 type="email"
                 value={profile.email}
-                onChange={(e) =>
+                placeholder="you@example.com"
+                aria-invalid={!!profileErrors.email}
+                onChange={(e) => {
                   setProfile((p) => ({ ...p, email: e.target.value }))
-                }
+                  if (profileErrors.email)
+                    setProfileErrors((err) => ({ ...err, email: undefined }))
+                }}
               />
+              {profileErrors.email && (
+                <p className="text-xs text-destructive">{profileErrors.email}</p>
+              )}
             </div>
             <div className="space-y-2 sm:col-span-2">
               <Label htmlFor="role">職稱</Label>
               <Input
                 id="role"
                 value={profile.role}
+                placeholder="例：市場研究主管"
                 onChange={(e) =>
                   setProfile((p) => ({ ...p, role: e.target.value }))
                 }
@@ -138,20 +182,30 @@ export function SettingsForm() {
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="workspace-name">工作區名稱</Label>
+              <Label htmlFor="workspace-name">
+                工作區名稱 <span className="text-destructive">*</span>
+              </Label>
               <Input
                 id="workspace-name"
                 value={workspace.name}
-                onChange={(e) =>
+                placeholder="請輸入工作區名稱"
+                aria-invalid={!!workspaceErrors.name}
+                onChange={(e) => {
                   setWorkspace((w) => ({ ...w, name: e.target.value }))
-                }
+                  if (workspaceErrors.name)
+                    setWorkspaceErrors((err) => ({ ...err, name: undefined }))
+                }}
               />
+              {workspaceErrors.name && (
+                <p className="text-xs text-destructive">{workspaceErrors.name}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="region">預設地區</Label>
               <Input
                 id="region"
                 value={workspace.region}
+                placeholder="例：日本"
                 onChange={(e) =>
                   setWorkspace((w) => ({ ...w, region: e.target.value }))
                 }
@@ -170,7 +224,7 @@ export function SettingsForm() {
           <CardHeader>
             <CardTitle>通知</CardTitle>
             <CardDescription>
-              選擇 MarketTomo 要通知你的內容。
+              選擇 MarketTomo 要通知你的內容。設定儲存於本機，未來版本將支援電子郵件通知。
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-1">

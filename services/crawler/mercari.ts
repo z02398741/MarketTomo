@@ -129,5 +129,4 @@ export async function searchMercari(keyword: string): Promise<Product[]> {
   return rawItems
     .map(itemToProduct)
     .filter((p): p is Product => p !== null)
-    .slice(0, 40)
 }

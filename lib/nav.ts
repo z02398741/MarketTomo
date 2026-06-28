@@ -24,7 +24,7 @@ export const navItems: NavItem[] = [
     title: "追蹤",
     href: "/tracking",
     icon: Radar,
-    description: "監控訊號與已儲存的查詢",
+    description: "管理你加入追蹤的商品",
   },
   {
     title: "設定",

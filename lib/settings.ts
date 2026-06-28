@@ -16,8 +16,8 @@ export interface AppSettings {
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
-  profile: { name: "Market Tomo", email: "you@example.com", role: "市場研究主管" },
-  workspace: { name: "MarketTomo", region: "全球" },
+  profile: { name: "", email: "", role: "" },
+  workspace: { name: "MarketTomo", region: "日本" },
   notifications: { alerts: true, digest: true, product: false },
 }
 

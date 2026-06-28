@@ -11,6 +11,7 @@ import {
 } from "lucide-react"
 
 import type { Platform, Product } from "@/lib/types"
+import { ACTIVE_PLATFORMS, PLATFORM_LABELS } from "@/lib/platforms"
 import { incrementSearchCount } from "@/lib/search-stats"
 import { ProductCard } from "@/components/search/product-card"
 
@@ -26,12 +27,11 @@ const yen = new Intl.NumberFormat("ja-JP", {
 
 type PlatformFilter = Platform | "all"
 
+// Derived from ACTIVE_PLATFORMS — adding a platform to lib/platforms.ts
+// automatically adds it to this filter list.
 const PLATFORM_OPTIONS: { value: PlatformFilter; label: string }[] = [
   { value: "all", label: "全平台" },
-  { value: "rakuten", label: "樂天" },
-  { value: "amazon", label: "Amazon" },
-  { value: "mercari", label: "Mercari" },
-  { value: "yahoo", label: "Yahoo" },
+  ...ACTIVE_PLATFORMS.map((p) => ({ value: p as PlatformFilter, label: PLATFORM_LABELS[p] })),
 ]
 
 export function SearchExperience() {
@@ -256,13 +256,19 @@ function ResultHeader({
     minPrice: prices.length ? Math.min(...prices) : 0,
     maxPrice: prices.length ? Math.max(...prices) : 0,
   }
-  const platformNames: Record<PlatformFilter, string> = {
-    all: "全平台",
-    rakuten: "樂天",
-    amazon: "Amazon",
-    mercari: "Mercari",
-    yahoo: "Yahoo",
-  }
+
+  // Per-platform product counts (only shown in "all" mode)
+  const perPlatform =
+    platform === "all"
+      ? ACTIVE_PLATFORMS.map((p) => ({
+          label: PLATFORM_LABELS[p],
+          count: products.filter((pr) => pr.platform === p).length,
+        })).filter((p) => p.count > 0)
+      : []
+
+  const platformDisplayName =
+    platform === "all" ? "全平台" : PLATFORM_LABELS[platform as Platform]
+
   const metrics = [
     { label: "商品數量", value: stats.count.toLocaleString() },
     { label: "平均價格", value: yen.format(stats.averagePrice) },
@@ -272,14 +278,28 @@ function ResultHeader({
 
   return (
     <div className="glass-card rounded-2xl p-5">
-      <p className="text-sm text-white/60">
-        搜尋關鍵字「
-        <span className="font-medium text-white">{keyword}</span>」
-        ・平台：
-        <span className="font-medium text-[#b08cff]">
-          {platformNames[platform]}
-        </span>
-      </p>
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+        <p className="text-sm text-white/60">
+          搜尋關鍵字「
+          <span className="font-medium text-white">{keyword}</span>」
+          ・平台：
+          <span className="font-medium text-[#b08cff]">
+            {platformDisplayName}
+          </span>
+        </p>
+        {perPlatform.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {perPlatform.map((p) => (
+              <span
+                key={p.label}
+                className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-white/50"
+              >
+                {p.label} {p.count}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
       <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
         {metrics.map((m) => (
           <div key={m.label}>
